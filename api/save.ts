@@ -16,11 +16,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       properties: {
         '항목명': { title: [{ text: { content: 항목명 } }] },
         '구분': { select: { name: 구분 } },
-        '내용': { rich_text: [{ text: { content: 내용 } }] },
+        '내용': { rich_text: [{ text: { content: 내용.slice(0, 100) } }] },
         '확장일': { date: { start: 확장일 } },
         '태그': { multi_select: 태그.map((name: string) => ({ name })) },
         '버전': { rich_text: [{ text: { content: 버전 } }] }
       }
+    });
+
+    const pageId = response.id;
+
+    await notion.blocks.children.append({
+      block_id: pageId,
+      children: [
+        {
+          object: 'block',
+          heading_2: {
+            rich_text: [{ type: 'text', text: { content: '📘 시장 대응 항목 본문' } }]
+          }
+        },
+        {
+          object: 'block',
+          paragraph: {
+            rich_text: [{ type: 'text', text: { content: 내용 } }]
+          }
+        }
+      ]
     });
 
     res.status(200).json({ message: 'Success', notion_response: response });
